@@ -149,14 +149,14 @@
             padding: 8px;
         }
 
-        /* Onglets Lexique - COLLÉ EN HAUT ET FORCE SURÉLEVÉ */
+        /* Onglets Lexique - FIXE EN HAUT DE L'ÉCRAN AU SCROLL */
         .tabs {
             display: flex;
             margin-bottom: 12px;
             background: #E5E5EA;
             padding: 4px;
             border-radius: 8px;
-            position: -webkit-sticky; /* Pour la compatibilité Safari/iPhone */
+            position: -webkit-sticky; /* Compatibilité iOS */
             position: sticky;
             top: 0;
             z-index: 9999 !important;
@@ -214,7 +214,7 @@
             
             <div class="loading-container" id="loadingArea">
                 <div class="spinner"></div>
-                <div style="color:#666; font-size:14px; font-style:italic;">Traitement et analyse de la page en cours...</div>
+                <div style="color:#666; font-size:14px; font-style:italic;">Compression et analyse de la page en cours...</div>
             </div>
         </div>
 
@@ -284,83 +284,76 @@
 
         const loadingArea = document.getElementById('loadingArea');
         loadingArea.style.display = 'flex';
-        
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            const originalImg = new Image();
-            originalImg.src = reader.result;
+
+        try {
+            // Moteur d'image ultra-robuste pour éviter les crashs de chargement mobiles
+            const imageBitmap = await createImageBitmap(file);
             
-            originalImg.onload = async () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                const MAX_WIDTH = 1200; // Légèrement réduit à 1200 pour maximiser encore plus la vitesse
-                let width = originalImg.width;
-                let height = originalImg.height;
-                
-                if (width > MAX_WIDTH) {
-                    height = Math.round((height * MAX_WIDTH) / width);
-                    width = MAX_WIDTH;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(originalImg, 0, 0, width, height);
-                
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
-                
-                // --- ALERTE DE DIAGNOSTIC ---
-                // Calcule la taille approximative du fichier final pour valider que le script tourne
-                const approxSizeKo = Math.round((compressedBase64.length * 3) / 4 / 1024);
-                alert(`Diagnostic : Image réduite avec succès à ${approxSizeKo} Ko. Envoi à l'IA...`);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const MAX_WIDTH = 1200; 
+            let width = imageBitmap.width;
+            let height = imageBitmap.height;
+            
+            if (width > MAX_WIDTH) {
+                height = Math.round((height * MAX_WIDTH) / width);
+                width = MAX_WIDTH;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(imageBitmap, 0, 0, width, height);
+            
+            // Extraction immédiate en JPEG léger
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+            
+            // Notification de succès pour confirmer que la compression a eu lieu
+            const sizeKo = Math.round((compressedBase64.length * 3) / 4 / 1024);
+            alert(`Succès : Photo réduite à ${sizeKo} Ko ! Envoi immédiat à l'IA...`);
 
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                    
-                    const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
 
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: promptText },
-                                    { inlineData: { mimeType: 'image/jpeg', data: compressedBase64 } }
-                                ]
-                            }],
-                            generationConfig: { 
-                                responseMimeType: "application/json", 
-                                temperature: 0.1 
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(errData.error?.message || response.statusText);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: promptText },
+                            { inlineData: { mimeType: 'image/jpeg', data: compressedBase64 } }
+                        ]
+                    }],
+                    generationConfig: { 
+                        responseMimeType: "application/json", 
+                        temperature: 0.1 
                     }
-                    
-                    const result = await response.json();
-                    const textResponse = result.candidates[0].content.parts[0].text.trim();
-                    const parsedData = JSON.parse(textResponse);
-                    
-                    let finalTitle = parsedData.numero_page && parsedData.numero_page.trim() !== "" ? parsedData.numero_page : "Page scannée";
-                    
-                    saveScanToStorage(finalTitle, parsedData);
-                    loadHistoryList();
-                    openLexicon(finalTitle, parsedData);
+                })
+            });
 
-                } catch (error) {
-                    console.error(error);
-                    alert("Erreur lors de l'analyse : " + error.message);
-                } finally {
-                    loadingArea.style.display = 'none';
-                    document.getElementById('imageInput').value = '';
-                }
-            };
-        };
-        reader.readAsDataURL(file);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error?.message || response.statusText);
+            }
+            
+            const result = await response.json();
+            const textResponse = result.candidates[0].content.parts[0].text.trim();
+            const parsedData = JSON.parse(textResponse);
+            
+            let finalTitle = parsedData.numero_page && parsedData.numero_page.trim() !== "" ? parsedData.numero_page : "Page scannée";
+            
+            saveScanToStorage(finalTitle, parsedData);
+            loadHistoryList();
+            openLexicon(finalTitle, parsedData);
+
+        } catch (error) {
+            console.error(error);
+            alert("Erreur lors de l'analyse : " + error.message);
+        } finally {
+            loadingArea.style.display = 'none';
+            document.getElementById('imageInput').value = '';
+        }
     });
 
     function saveScanToStorage(title, data) {
