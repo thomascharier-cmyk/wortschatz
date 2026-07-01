@@ -149,7 +149,7 @@
             padding: 8px;
         }
 
-        /* Onglets Lexique - COMPATIBILITÉ STICKY MAXIMALE */
+        /* Onglets Lexique - STICKY COMPATIBLE MOBILE */
         .tabs {
             display: flex;
             margin-bottom: 12px;
@@ -214,7 +214,7 @@
             
             <div class="loading-container" id="loadingArea">
                 <div class="spinner"></div>
-                <div style="color:#666; font-size:14px; font-style:italic;">Traitement et analyse de la page en cours...</div>
+                <div style="color:#666; font-size:14px; font-style:italic;">Analyse intelligente en cours...</div>
             </div>
         </div>
 
@@ -293,6 +293,7 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
+                // On reste sur un compromis parfait de 1200px pour garder une lisibilité maximale pour l'IA
                 const MAX_WIDTH = 1200; 
                 let width = img.width;
                 let height = img.height;
@@ -309,11 +310,10 @@
                 const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
                 URL.revokeObjectURL(img.src);
 
-                // --- POPUP DE SÉCURITÉ ---
-                alert("POP-UP DE VALIDATION : Le code de compression s'exécute à l'instant !");
-
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
+                
+                // PROMPT RACCOURCI AU MAXIMUM : Moins de tokens à traiter = Réponse plus rapide de l'IA
+                const promptText = "Analyse cette image de texte allemand. Trouve le numéro de page (ex: 'Page 12') pour la clé 'numero_page'. Extrais le vocabulaire important traduit en français selon le contexte sous forme de JSON pur avec les clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. RÈGLE : Ajoute l'article (der/die/das) devant 'singulier' et 'die' devant 'pluriel'. Pas de markdown, pas de texte autour.";
 
                 const response = await fetch(url, {
                     method: 'POST',
