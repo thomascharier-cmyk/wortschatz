@@ -288,8 +288,8 @@
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 
-                // Prompt calibré pour exiger le singulier ET le pluriel avec articles sur deux lignes distinctes pour les noms
-                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image (en haut ou en bas). Extrais ensuite TOUS les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris juste 'Page ' suivi du numéro trouvé (ex: 'Page 11'). Si aucun numéro n'est visible, mets ''. Structure : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Pour 'singulier' et 'pluriel' des noms, mets obligatoirement l'article défini devant (ex: singulier: 'der Hund', pluriel: 'die Hunde'). Pour formes (des verbes) mets les temps forts (ex: 'gibt, gab, hat gegeben'). Renvoie du JSON pur sans balises Markdown.";
+                // Prompt renforcé pour EXIGER STRICTEMENT l'article de genre devant le singulier et le pluriel
+                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -301,7 +301,10 @@
                                 { inlineData: { mimeType: mimeType, data: base64Image } }
                             ]
                         }],
-                        generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
+                        generationConfig: { 
+                            responseMimeType: "application/json", 
+                            temperature: 0.1 
+                        }
                     })
                 });
 
@@ -387,12 +390,11 @@
         }
     }
 
+    // Ouvrir l'écran du glossaire et injecter les mots
     function openLexicon(title, data) {
         document.getElementById('currentLexiconTitle').textContent = title;
         
-        // Rendu spécifique pour les noms (fusion de deux clés avec un saut de ligne)
         renderNomsTable(data.noms);
-        
         renderTable('body-verbes', data.verbes, ['traduction', 'infinitif', 'formes']);
         renderTable('body-adjectifs', data.adjectifs, ['traduction', 'base']);
         renderTable('body-liaisons', data.liaisons, ['traduction', 'role']);
@@ -407,7 +409,7 @@
         document.getElementById('screen-home').classList.add('active');
     }
 
-    // Fonction sur mesure pour l'affichage Singulier / Pluriel empilés
+    // Rendu spécifique pour les noms (Singulier au-dessus du Pluriel)
     function renderNomsTable(items) {
         const tbody = document.getElementById('body-noms');
         tbody.innerHTML = '';
@@ -429,7 +431,6 @@
             
             const cellBase = document.createElement('td');
             cellBase.className = 'base-form';
-            // Empilement du Singulier et du Pluriel avec un saut de ligne
             const singulierText = item.singulier || '-';
             const plurielText = item.pluriel || '-';
             cellBase.innerHTML = `${singulierText}<br>${plurielText}`;
