@@ -293,7 +293,6 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // On reste sur un compromis parfait de 1200px pour garder une lisibilité maximale pour l'IA
                 const MAX_WIDTH = 1200; 
                 let width = img.width;
                 let height = img.height;
@@ -311,8 +310,6 @@
                 URL.revokeObjectURL(img.src);
 
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                
-                // PROMPT RACCOURCI AU MAXIMUM : Moins de tokens à traiter = Réponse plus rapide de l'IA
                 const promptText = "Analyse cette image de texte allemand. Trouve le numéro de page (ex: 'Page 12') pour la clé 'numero_page'. Extrais le vocabulaire important traduit en français selon le contexte sous forme de JSON pur avec les clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. RÈGLE : Ajoute l'article (der/die/das) devant 'singulier' et 'die' devant 'pluriel'. Pas de markdown, pas de texte autour.";
 
                 const response = await fetch(url, {
