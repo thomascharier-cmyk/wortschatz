@@ -24,7 +24,7 @@
         }
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             box-sizing: border-box;
         }
         h1 {
@@ -67,13 +67,36 @@
         .btn:active {
             background: #0062D6;
         }
-        .loading {
+        
+        /* Loader animé moderne */
+        .loading-container {
             display: none;
-            margin-top: 16px;
+            margin-top: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 118, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
             color: #666;
             font-style: italic;
             font-size: 14px;
+            text-align: center;
+            line-height: 1.4;
         }
+        
         .api-config {
             background: var(--card);
             padding: 16px;
@@ -135,12 +158,14 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 450px; /* Évite l'écrasement sur petit écran */
         }
         th, td {
             text-align: left;
             padding: 12px 10px;
             border-bottom: 1px solid #E5E5EA;
             font-size: 14px;
+            vertical-align: top;
         }
         th {
             background: #F9F9FB;
@@ -176,7 +201,11 @@
         <p style="margin-top:0; color:#333;">Prenez en photo une page de votre livre allemand</p>
         <label class="btn" for="imageInput">📷 Scanner une page</label>
         <input type="file" id="imageInput" accept="image/*" capture="environment">
-        <div class="loading" id="loadingText">Analyse de la page en cours...<br><span style="font-size:11px; color:#888;">Extraction, classement et traduction en cours...</span></div>
+        
+        <div class="loading-container" id="loadingArea">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyse de la page en cours...<br><span style="font-size:11px; color:#888;">Extraction, classement et traduction...</span></div>
+        </div>
     </div>
 
     <div class="tabs" id="tabsContainer">
@@ -188,28 +217,28 @@
 
     <div id="noms" class="tab-content active">
         <table>
-            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Forme de base / Pluriel</th></tr></thead>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction en contexte</th><th>Forme de base (singulier & pluriel)</th></tr></thead>
             <tbody id="body-noms"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
         </table>
     </div>
     
     <div id="verbes" class="tab-content">
         <table>
-            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Infinitif / Formes</th></tr></thead>
-            <tbody id="body-verbes"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction en contexte</th><th>Infinitif</th><th>Formes principales</th></tr></thead>
+            <tbody id="body-verbes"><tr><td colspan="4" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
         </table>
     </div>
     
     <div id="adjectifs" class="tab-content">
         <table>
-            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Forme de base</th></tr></thead>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction en contexte</th><th>Forme de base</th></tr></thead>
             <tbody id="body-adjectifs"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
         </table>
     </div>
     
     <div id="liaisons" class="tab-content">
         <table>
-            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Rôle grammatical</th></tr></thead>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction en contexte</th><th>Rôle grammatical</th></tr></thead>
             <tbody id="body-liaisons"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
         </table>
     </div>
@@ -220,8 +249,8 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        const loadingText = document.getElementById('loadingText');
-        loadingText.style.display = 'block';
+        const loadingArea = document.getElementById('loadingArea');
+        loadingArea.style.display = 'flex';
         
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -231,13 +260,15 @@
             
             if (!apiKey) {
                 alert("Veuillez renseigner votre clé API Gemini pour lancer l'analyse.");
-                loadingText.style.display = 'none';
+                loadingArea.style.display = 'none';
                 return;
             }
 
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const promptText = "Analyses cette image de texte en allemand. Extrais absolument TOUS les mots significatifs (noms, verbes, adjectifs, mots de liaison) et traduis-les en français selon le contexte exact. Renvoie UNIQUEMENT un objet JSON avec 4 clés : 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure : noms -> [{mot, traduction, base}], verbes -> [{mot, traduction, infinitif}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Ne mets aucun texte Markdown d'enrobage, juste le JSON pur.";
+                
+                // Prompt durci et ultra-précis pour matcher les structures demandées
+                const promptText = "Analyses cette image de texte en allemand. Extrais TOUS les mots significatifs et traduis-les en français selon le contexte exact. Renvoie UNIQUEMENT un objet JSON avec 4 clés : 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure attendue : noms -> [{mot, traduction, base_pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Pour base_pluriel mets par ex 'der Tisch, die Tische'. Pour formes (des verbes) mets les temps forts, par ex 'gibt, gab, hat gegeben'. Renvoie du JSON pur sans balises Markdown.";
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -249,52 +280,66 @@
                                 { inlineData: { mimeType: mimeType, data: base64Image } }
                             ]
                         }],
-                        generationConfig: { responseMimeType: "application/json" }
+                        generationConfig: { 
+                            responseMimeType: "application/json",
+                            temperature: 0.1
+                        }
                     })
                 });
 
-                if (!response.ok) throw new Error("Erreur API : " + response.statusText);
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || response.statusText);
+                }
                 
                 const result = await response.json();
-                const textResponse = result.candidates[0].content.parts[0].text;
+                const textResponse = result.candidates[0].content.parts[0].text.trim();
                 const data = JSON.parse(textResponse);
                 
-                renderTable('body-noms', data.noms, 'base');
-                renderTable('body-verbes', data.verbes, 'infinitif');
-                renderTable('body-adjectifs', data.adjectifs, 'base');
-                renderTable('body-liaisons', data.liaisons, 'role');
+                // Rendu des tableaux selon la nouvelle configuration des colonnes
+                renderTable('body-noms', data.noms, ['traduction', 'base_pluriel']);
+                renderTable('body-verbes', data.verbes, ['traduction', 'infinitif', 'formes']);
+                renderTable('body-adjectifs', data.adjectifs, ['traduction', 'base']);
+                renderTable('body-liaisons', data.liaisons, ['traduction', 'role']);
                 
                 document.getElementById('tabsContainer').style.display = 'flex';
             } catch (error) {
                 console.error(error);
-                alert("Une erreur est survenue lors de l'analyse : " + error.message);
+                alert("Erreur lors de l'analyse : " + error.message);
             } finally {
-                loadingText.style.display = 'none';
+                loadingArea.style.display = 'none';
             }
         };
         reader.readAsDataURL(file);
     });
 
-    function renderTable(elementId, items, extraKey) {
+    function renderTable(elementId, items, keysArray) {
         const tbody = document.getElementById(elementId);
         tbody.innerHTML = '';
+        
         if (!items || items.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">Aucun élément trouvé.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${keysArray.length + 1}" style="text-align:center; color:#999;">Aucun élément trouvé.</td></tr>`;
             return;
         }
+        
         items.forEach(item => {
             const row = document.createElement('tr');
+            
+            // Première colonne : Toujours le mot extrait du texte
             const cellMot = document.createElement('td');
             cellMot.className = 'word-highlight';
             cellMot.textContent = item.mot;
-            const cellTrad = document.createElement('td');
-            cellTrad.textContent = item.traduction;
-            const cellExtra = document.createElement('td');
-            cellExtra.className = 'base-form';
-            cellExtra.textContent = item[extraKey] || '-';
             row.appendChild(cellMot);
-            row.appendChild(cellTrad);
-            row.appendChild(cellExtra);
+            
+            // Colonnes dynamiques demandées
+            keysArray.forEach((key, index) => {
+                const cell = document.createElement('td');
+                // Applique le style plus discret/italique pour les formes de base (dernières colonnes)
+                if (index > 0) cell.className = 'base-form';
+                cell.textContent = item[key] || '-';
+                row.appendChild(cell);
+            });
+            
             tbody.appendChild(row);
         });
     }
