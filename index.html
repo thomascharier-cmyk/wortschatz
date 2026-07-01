@@ -149,17 +149,17 @@
             padding: 8px;
         }
 
-        /* Onglets Lexique - FIXE EN HAUT DE L'ÉCRAN AU SCROLL */
+        /* Onglets Lexique - COMPATIBILITÉ STICKY MAXIMALE */
         .tabs {
             display: flex;
             margin-bottom: 12px;
             background: #E5E5EA;
             padding: 4px;
             border-radius: 8px;
-            position: -webkit-sticky; /* Compatibilité iOS */
+            position: -webkit-sticky;
             position: sticky;
             top: 0;
-            z-index: 9999 !important;
+            z-index: 999;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .tab-btn {
@@ -214,7 +214,7 @@
             
             <div class="loading-container" id="loadingArea">
                 <div class="spinner"></div>
-                <div style="color:#666; font-size:14px; font-style:italic;">Compression et analyse de la page en cours...</div>
+                <div style="color:#666; font-size:14px; font-style:italic;">Traitement et analyse de la page en cours...</div>
             </div>
         </div>
 
@@ -285,75 +285,79 @@
         const loadingArea = document.getElementById('loadingArea');
         loadingArea.style.display = 'flex';
 
-        try {
-            // Moteur d'image ultra-robuste pour éviter les crashs de chargement mobiles
-            const imageBitmap = await createImageBitmap(file);
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            const MAX_WIDTH = 1200; 
-            let width = imageBitmap.width;
-            let height = imageBitmap.height;
-            
-            if (width > MAX_WIDTH) {
-                height = Math.round((height * MAX_WIDTH) / width);
-                width = MAX_WIDTH;
+        // Utilisation d'un conteneur d'image standard avec URL d'objet (méthode la plus sûre)
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+
+        img.onload = async () => {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                const MAX_WIDTH = 1200; 
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > MAX_WIDTH) {
+                    height = Math.round((height * MAX_WIDTH) / width);
+                    width = MAX_WIDTH;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+                URL.revokeObjectURL(img.src); // Libère proprement la mémoire vive du téléphone
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: promptText },
+                                { inlineData: { mimeType: 'image/jpeg', data: compressedBase64 } }
+                            ]
+                        }],
+                        generationConfig: { 
+                            responseMimeType: "application/json", 
+                            temperature: 0.1 
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || response.statusText);
+                }
+                
+                const result = await response.json();
+                const textResponse = result.candidates[0].content.parts[0].text.trim();
+                const parsedData = JSON.parse(textResponse);
+                
+                let finalTitle = parsedData.numero_page && parsedData.numero_page.trim() !== "" ? parsedData.numero_page : "Page scannée";
+                
+                saveScanToStorage(finalTitle, parsedData);
+                loadHistoryList();
+                openLexicon(finalTitle, parsedData);
+
+            } catch (error) {
+                console.error(error);
+                alert("Erreur lors de l'analyse : " + error.message);
+            } finally {
+                loadingArea.style.display = 'none';
+                document.getElementById('imageInput').value = '';
             }
-            
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(imageBitmap, 0, 0, width, height);
-            
-            // Extraction immédiate en JPEG léger
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
-            
-            // Notification de succès pour confirmer que la compression a eu lieu
-            const sizeKo = Math.round((compressedBase64.length * 3) / 4 / 1024);
-            alert(`Succès : Photo réduite à ${sizeKo} Ko ! Envoi immédiat à l'IA...`);
+        };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-            const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: promptText },
-                            { inlineData: { mimeType: 'image/jpeg', data: compressedBase64 } }
-                        ]
-                    }],
-                    generationConfig: { 
-                        responseMimeType: "application/json", 
-                        temperature: 0.1 
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error?.message || response.statusText);
-            }
-            
-            const result = await response.json();
-            const textResponse = result.candidates[0].content.parts[0].text.trim();
-            const parsedData = JSON.parse(textResponse);
-            
-            let finalTitle = parsedData.numero_page && parsedData.numero_page.trim() !== "" ? parsedData.numero_page : "Page scannée";
-            
-            saveScanToStorage(finalTitle, parsedData);
-            loadHistoryList();
-            openLexicon(finalTitle, parsedData);
-
-        } catch (error) {
-            console.error(error);
-            alert("Erreur lors de l'analyse : " + error.message);
-        } finally {
+        img.onerror = () => {
             loadingArea.style.display = 'none';
-            document.getElementById('imageInput').value = '';
-        }
+            alert("Erreur de lecture de l'image. Essayez de reprendre la photo sous un autre angle ou d'utiliser un fichier existant.");
+        };
     });
 
     function saveScanToStorage(title, data) {
