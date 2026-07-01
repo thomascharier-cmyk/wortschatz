@@ -187,7 +187,7 @@
         th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #E5E5EA; font-size: 14px; vertical-align: top; }
         th { background: #F9F9FB; font-weight: 600; color: #555; }
         .word-highlight { font-weight: bold; color: #000; }
-        .base-form { font-size: 13px; color: #555; font-style: italic; }
+        .base-form { font-size: 13px; color: #555; font-style: italic; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -288,8 +288,8 @@
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 
-                // Prompt mis à jour pour ordonner la détection du numéro de page
-                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image (en haut ou en bas). Extrais ensuite TOUS les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris juste 'Page ' suivi du numéro trouvé (ex: 'Page 11'). Si aucun numéro n'est visible, mets une chaîne vide ''. Structure : noms -> [{mot, traduction, base_pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Ne mets aucune balise Markdown.";
+                // Prompt calibré pour exiger le singulier ET le pluriel avec articles sur deux lignes distinctes pour les noms
+                const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image (en haut ou en bas). Extrais ensuite TOUS les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris juste 'Page ' suivi du numéro trouvé (ex: 'Page 11'). Si aucun numéro n'est visible, mets ''. Structure : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Pour 'singulier' et 'pluriel' des noms, mets obligatoirement l'article défini devant (ex: singulier: 'der Hund', pluriel: 'die Hunde'). Pour formes (des verbes) mets les temps forts (ex: 'gibt, gab, hat gegeben'). Renvoie du JSON pur sans balises Markdown.";
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -314,10 +314,8 @@
                 const textResponse = result.candidates[0].content.parts[0].text.trim();
                 const parsedData = JSON.parse(textResponse);
                 
-                // Si l'IA n'a pas détecté le numéro de page, on donne un nom par défaut daté
                 let finalTitle = parsedData.numero_page && parsedData.numero_page.trim() !== "" ? parsedData.numero_page : "Page scannée";
                 
-                // Sauvegarde
                 saveScanToStorage(finalTitle, parsedData);
                 loadHistoryList();
                 openLexicon(finalTitle, parsedData);
@@ -392,7 +390,9 @@
     function openLexicon(title, data) {
         document.getElementById('currentLexiconTitle').textContent = title;
         
-        renderTable('body-noms', data.noms, ['traduction', 'base_pluriel']);
+        // Rendu spécifique pour les noms (fusion de deux clés avec un saut de ligne)
+        renderNomsTable(data.noms);
+        
         renderTable('body-verbes', data.verbes, ['traduction', 'infinitif', 'formes']);
         renderTable('body-adjectifs', data.adjectifs, ['traduction', 'base']);
         renderTable('body-liaisons', data.liaisons, ['traduction', 'role']);
@@ -405,6 +405,38 @@
     function showHomeScreen() {
         document.getElementById('screen-lexicon').classList.remove('active');
         document.getElementById('screen-home').classList.add('active');
+    }
+
+    // Fonction sur mesure pour l'affichage Singulier / Pluriel empilés
+    function renderNomsTable(items) {
+        const tbody = document.getElementById('body-noms');
+        tbody.innerHTML = '';
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucun élément.</td></tr>`;
+            return;
+        }
+        items.forEach(item => {
+            const row = document.createElement('tr');
+            
+            const cellMot = document.createElement('td');
+            cellMot.className = 'word-highlight';
+            cellMot.textContent = item.mot;
+            row.appendChild(cellMot);
+            
+            const cellTrad = document.createElement('td');
+            cellTrad.textContent = item.traduction;
+            row.appendChild(cellTrad);
+            
+            const cellBase = document.createElement('td');
+            cellBase.className = 'base-form';
+            // Empilement du Singulier et du Pluriel avec un saut de ligne
+            const singulierText = item.singulier || '-';
+            const plurielText = item.pluriel || '-';
+            cellBase.innerHTML = `${singulierText}<br>${plurielText}`;
+            row.appendChild(cellBase);
+            
+            tbody.appendChild(row);
+        });
     }
 
     function renderTable(elementId, items, keysArray) {
