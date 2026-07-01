@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WortSchatz - Mon Compagnon d'Allemand</title>
+    <title>WortSchatz V3 - Mon Compagnon d'Allemand</title>
     <style>
         :root {
             --primary: #0076FF;
@@ -198,7 +198,7 @@
 <body>
 
 <div class="container">
-    <h1>WortSchatz 📖</h1>
+    <h1>WortSchatz V3 🚀</h1>
     <div class="subtitle">Mon compagnon de lecture allemand pour le niveau B1.3</div>
     
     <div id="screen-home" class="screen active">
@@ -285,7 +285,6 @@
         const loadingArea = document.getElementById('loadingArea');
         loadingArea.style.display = 'flex';
 
-        // Utilisation d'un conteneur d'image standard avec URL d'objet (méthode la plus sûre)
         const img = new Image();
         img.src = URL.createObjectURL(file);
 
@@ -308,7 +307,10 @@
                 ctx.drawImage(img, 0, 0, width, height);
                 
                 const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
-                URL.revokeObjectURL(img.src); // Libère proprement la mémoire vive du téléphone
+                URL.revokeObjectURL(img.src);
+
+                // --- POPUP DE SÉCURITÉ ---
+                alert("POP-UP DE VALIDATION : Le code de compression s'exécute à l'instant !");
 
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 const promptText = "Analyses cette image de texte en allemand. Trouve d'abord le numéro de la page imprimé sur l'image. Extrais ensuite les mots significatifs et traduis-les en français selon le contexte. Renvoie UNIQUEMENT un objet JSON avec 5 clés : 'numero_page', 'noms', 'verbes', 'adjectifs', 'liaisons'. Pour 'numero_page', écris 'Page X' (ex: 'Page 11'). Structure attendue : noms -> [{mot, traduction, singulier, pluriel}], verbes -> [{mot, traduction, infinitif, formes}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. ATTENTION ABSOLUE POUR LES NOMS : Tu dois OBLIGATOIREMENT ajouter l'article défini correspondant au genre (der, die ou das) devant la valeur de la clé 'singulier', et l'article 'die' devant la valeur de la clé 'pluriel'. Exemple strict : singulier: 'der Hund', pluriel: 'die Hunde'. Ne renvoie aucun enrobage ni balise Markdown.";
@@ -356,7 +358,7 @@
 
         img.onerror = () => {
             loadingArea.style.display = 'none';
-            alert("Erreur de lecture de l'image. Essayez de reprendre la photo sous un autre angle ou d'utiliser un fichier existant.");
+            alert("Erreur de lecture de l'image.");
         };
     });
 
