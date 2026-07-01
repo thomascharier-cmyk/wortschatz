@@ -1,340 +1,310 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WortSchatz - Mon Compagnon d'Allemand</title>
+    <style>
+        :root {
+            --primary: #0076FF;
+            --bg: #F5F5F7;
+            --card: #FFFFFF;
+            --text: #1D1D1F;
+            --accent: #E5E5EA;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .upload-section {
+            background: var(--card);
+            padding: 30px 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            border: 1px dashed #D1D1D6;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 118, 255, 0.2);
+            transition: background 0.2s;
+        }
+        .btn:active {
+            background: #0062D6;
+        }
+        .loading {
+            display: none;
+            margin-top: 16px;
+            color: #666;
+            font-style: italic;
+            font-size: 14px;
+        }
+        .api-config {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .api-config label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        .api-config input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D1D6;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .tabs {
+            display: none;
+            margin-bottom: 12px;
+            background: #E5E5EA;
+            padding: 2px;
+            border-radius: 8px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 2px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            border-radius: 6px;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .tab-btn.active {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab-content {
+            display: none;
+            background: var(--card);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 1px solid #E5E5EA;
+            font-size: 14px;
+        }
+        th {
+            background: #F9F9FB;
+            font-weight: 600;
+            color: #555;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .word-highlight {
+            font-weight: bold;
+            color: #000;
+        }
+        .base-form {
+            font-size: 13px;
+            color: #555;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="fr"&gt;</p>
-<p class="p1">&lt;head&gt; </p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;WortSchatz - Mon Compagnon d'Allemand&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--primary: #0076FF;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--bg: #F5F5F7;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--card: #FFFFFF;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--text: #1D1D1F;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--accent: #E5E5EA;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--bg);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 500px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 26px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.subtitle {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.upload-section {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 30px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(0,0,0,0.05);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px dashed #D1D1D6;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>input[type="file"] {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: var(--primary);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 14px 28px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 8px rgba(0, 118, 255, 0.2);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: background 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #0062D6;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.loading {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-style: italic;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.api-config {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 8px rgba(0,0,0,0.04);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.api-config label {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.api-config input {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #D1D1D6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Style des Onglets */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tabs {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #E5E5EA;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 2px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-btn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 2px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: transparent;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.15s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-btn.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 4px rgba(0,0,0,0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-content {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(0,0,0,0.05);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow-x: auto;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-content.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>table {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-collapse: collapse;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>th, td {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 1px solid #E5E5EA;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>th {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #F9F9FB;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>tr:last-child td {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.word-highlight {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #000;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.base-form {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 13px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-style: italic;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;WortSchatz 📖&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="subtitle"&gt;Mon compagnon de lecture allemand pour le niveau B1.3&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="api-config"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label for="apiKeyInput"&gt;Clé API Google Gemini :&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="password" id="apiKeyInput" placeholder="AIzaSy..."&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="upload-section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p style="margin-top:0; color:#333;"&gt;Prenez en photo une page de votre livre allemand&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label class="btn" for="imageInput"&gt;📷 Scanner une page&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="file" id="imageInput" accept="image/*" capture="environment"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="loading" id="loadingText"&gt;Analyse de la page en cours...&lt;br&gt;&lt;span style="font-size:11px; color:#888;"&gt;Extraction, classement et traduction en cours...&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tabs" id="tabsContainer"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="tab-btn active" onclick="switchTab(event, 'noms')"&gt;Noms&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="tab-btn" onclick="switchTab(event, 'verbes')"&gt;Verbes&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="tab-btn" onclick="switchTab(event, 'adjectifs')"&gt;Adj.&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="tab-btn" onclick="switchTab(event, 'liaisons')"&gt;Liaisons&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="noms" class="tab-content active"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Mot dans le texte&lt;/th&gt;&lt;th&gt;Traduction&lt;/th&gt;&lt;th&gt;Forme de base / Pluriel&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody id="body-noms"&gt;&lt;tr&gt;&lt;td colspan="3" style="text-align:center; color:#999; padding:20px;"&gt;Aucune page scannée pour le moment.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="verbes" class="tab-content"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Mot dans le texte&lt;/th&gt;&lt;th&gt;Traduction&lt;/th&gt;&lt;th&gt;Infinitif / Formes&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody id="body-verbes"&gt;&lt;tr&gt;&lt;td colspan="3" style="text-align:center; color:#999; padding:20px;"&gt;Aucune page scannée pour le moment.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="adjectifs" class="tab-content"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Mot dans le texte&lt;/th&gt;&lt;th&gt;Traduction&lt;/th&gt;&lt;th&gt;Forme de base&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody id="body-adjectifs"&gt;&lt;tr&gt;&lt;td colspan="3" style="text-align:center; color:#999; padding:20px;"&gt;Aucune page scannée pour le moment.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="liaisons" class="tab-content"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Mot dans le texte&lt;/th&gt;&lt;th&gt;Traduction&lt;/th&gt;&lt;th&gt;Rôle grammatical&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody id="body-liaisons"&gt;&lt;tr&gt;&lt;td colspan="3" style="text-align:center; color:#999; padding:20px;"&gt;Aucune page scannée pour le moment.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/table&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('imageInput').addEventListener('change', async (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const file = e.target.files[0];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!file) return;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const loadingText = document.getElementById('loadingText');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>loadingText.style.display = 'block';</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const reader = new FileReader();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.onloadend = async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const base64Image = reader.result.split(',')[1];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const mimeType = file.type;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const apiKey = document.getElementById('apiKeyInput').value.trim();</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!apiKey) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert("Veuillez renseigner votre clé API Gemini pour lancer l'analyse.");</p>
-<p class="p1"><span class="Apple-converted-space">                </span>loadingText.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const promptText = "Analyses cette image de texte en allemand. Extrais absolument TOUS les mots significatifs (noms, verbes, adjectifs, mots de liaison) et traduis-les en français selon le contexte exact. Renvoie UNIQUEMENT un objet JSON avec 4 clés : 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure : noms -&gt; [{mot, traduction, base}], verbes -&gt; [{mot, traduction, infinitif}], adjectifs -&gt; [{mot, traduction, base}], liaisons -&gt; [{mot, traduction, role}]. Ne mets aucun texte Markdown d'enrobage, juste le JSON pur.";</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(url, {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>method: 'POST',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>headers: { 'Content-Type': 'application/json' },</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>body: JSON.stringify({</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>contents: [{</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>parts: [</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>{ text: promptText },</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>{ inlineData: { mimeType: mimeType, data: base64Image } }</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>]</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}],</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>generationConfig: {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>responseMimeType: "application/json"</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error("Erreur API : " + response.statusText);</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const result = await response.json();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const textResponse = result.candidates[0].content.parts[0].text;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const data = JSON.parse(textResponse);</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderTable('body-noms', data.noms, 'base');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderTable('body-verbes', data.verbes, 'infinitif');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderTable('body-adjectifs', data.adjectifs, 'base');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderTable('body-liaisons', data.liaisons, 'role');</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('tabsContainer').style.display = 'flex';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.error(error);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert("Une erreur est survenue lors de l'analyse : " + error.message);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} finally {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>loadingText.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.readAsDataURL(file);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function renderTable(elementId, items, extraKey) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const tbody = document.getElementById(elementId);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>tbody.innerHTML = '';</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!items || items.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>tbody.innerHTML = '&lt;tr&gt;&lt;td colspan="3" style="text-align:center; color:#999;"&gt;Aucun élément trouvé.&lt;/td&gt;&lt;/tr&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>items.forEach(item =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const row = document.createElement('tr');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const cellMot = document.createElement('td');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cellMot.className = 'word-highlight';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cellMot.textContent = item.mot;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const cellTrad = document.createElement('td');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cellTrad.textContent = item.traduction;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const cellExtra = document.createElement('td');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cellExtra.className = 'base-form';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cellExtra.textContent = item[extraKey] || '-';</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>row.appendChild(cellMot);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>row.appendChild(cellTrad);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>row.appendChild(cellExtra);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>tbody.appendChild(row);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function switchTab(evt, tabId) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.querySelectorAll('.tab-content').forEach(tab =&gt; tab.classList.remove('active'));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.querySelectorAll('.tab-btn').forEach(btn =&gt; btn.classList.remove('active'));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById(tabId).classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>evt.currentTarget.classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<div class="container">
+    <h1>WortSchatz 📖</h1>
+    <div class="subtitle">Mon compagnon de lecture allemand pour le niveau B1.3</div>
+    
+    <div class="api-config">
+        <label for="apiKeyInput">Clé API Google Gemini :</label>
+        <input type="password" id="apiKeyInput" placeholder="AIzaSy...">
+    </div>
+    
+    <div class="upload-section">
+        <p style="margin-top:0; color:#333;">Prenez en photo une page de votre livre allemand</p>
+        <label class="btn" for="imageInput">📷 Scanner une page</label>
+        <input type="file" id="imageInput" accept="image/*" capture="environment">
+        <div class="loading" id="loadingText">Analyse de la page en cours...<br><span style="font-size:11px; color:#888;">Extraction, classement et traduction en cours...</span></div>
+    </div>
+
+    <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" onclick="switchTab(event, 'noms')">Noms</button>
+        <button class="tab-btn" onclick="switchTab(event, 'verbes')">Verbes</button>
+        <button class="tab-btn" onclick="switchTab(event, 'adjectifs')">Adj.</button>
+        <button class="tab-btn" onclick="switchTab(event, 'liaisons')">Liaisons</button>
+    </div>
+
+    <div id="noms" class="tab-content active">
+        <table>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Forme de base / Pluriel</th></tr></thead>
+            <tbody id="body-noms"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
+        </table>
+    </div>
+    
+    <div id="verbes" class="tab-content">
+        <table>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Infinitif / Formes</th></tr></thead>
+            <tbody id="body-verbes"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
+        </table>
+    </div>
+    
+    <div id="adjectifs" class="tab-content">
+        <table>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Forme de base</th></tr></thead>
+            <tbody id="body-adjectifs"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
+        </table>
+    </div>
+    
+    <div id="liaisons" class="tab-content">
+        <table>
+            <thead><tr><th>Mot dans le texte</th><th>Traduction</th><th>Rôle grammatical</th></tr></thead>
+            <tbody id="body-liaisons"><tr><td colspan="3" style="text-align:center; color:#999; padding:20px;">Aucune page scannée pour le moment.</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('imageInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const loadingText = document.getElementById('loadingText');
+        loadingText.style.display = 'block';
+        
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64Image = reader.result.split(',')[1];
+            const mimeType = file.type;
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!apiKey) {
+                alert("Veuillez renseigner votre clé API Gemini pour lancer l'analyse.");
+                loadingText.style.display = 'none';
+                return;
+            }
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const promptText = "Analyses cette image de texte en allemand. Extrais absolument TOUS les mots significatifs (noms, verbes, adjectifs, mots de liaison) et traduis-les en français selon le contexte exact. Renvoie UNIQUEMENT un objet JSON avec 4 clés : 'noms', 'verbes', 'adjectifs', 'liaisons'. Structure : noms -> [{mot, traduction, base}], verbes -> [{mot, traduction, infinitif}], adjectifs -> [{mot, traduction, base}], liaisons -> [{mot, traduction, role}]. Ne mets aucun texte Markdown d'enrobage, juste le JSON pur.";
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: promptText },
+                                { inlineData: { mimeType: mimeType, data: base64Image } }
+                            ]
+                        }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                if (!response.ok) throw new Error("Erreur API : " + response.statusText);
+                
+                const result = await response.json();
+                const textResponse = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(textResponse);
+                
+                renderTable('body-noms', data.noms, 'base');
+                renderTable('body-verbes', data.verbes, 'infinitif');
+                renderTable('body-adjectifs', data.adjectifs, 'base');
+                renderTable('body-liaisons', data.liaisons, 'role');
+                
+                document.getElementById('tabsContainer').style.display = 'flex';
+            } catch (error) {
+                console.error(error);
+                alert("Une erreur est survenue lors de l'analyse : " + error.message);
+            } finally {
+                loadingText.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function renderTable(elementId, items, extraKey) {
+        const tbody = document.getElementById(elementId);
+        tbody.innerHTML = '';
+        if (!items || items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">Aucun élément trouvé.</td></tr>';
+            return;
+        }
+        items.forEach(item => {
+            const row = document.createElement('tr');
+            const cellMot = document.createElement('td');
+            cellMot.className = 'word-highlight';
+            cellMot.textContent = item.mot;
+            const cellTrad = document.createElement('td');
+            cellTrad.textContent = item.traduction;
+            const cellExtra = document.createElement('td');
+            cellExtra.className = 'base-form';
+            cellExtra.textContent = item[extraKey] || '-';
+            row.appendChild(cellMot);
+            row.appendChild(cellTrad);
+            row.appendChild(cellExtra);
+            tbody.appendChild(row);
+        });
+    }
+
+    function switchTab(evt, tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+</script>
 </body>
 </html>
