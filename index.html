@@ -149,17 +149,18 @@
             padding: 8px;
         }
 
-        /* Onglets Lexique - MENU STICKY */
+        /* Onglets Lexique - COLLÉ EN HAUT ET FORCE SURÉLEVÉ */
         .tabs {
             display: flex;
             margin-bottom: 12px;
             background: #E5E5EA;
-            padding: 2px;
+            padding: 4px;
             border-radius: 8px;
+            position: -webkit-sticky; /* Pour la compatibilité Safari/iPhone */
             position: sticky;
             top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            z-index: 9999 !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .tab-btn {
             flex: 1;
@@ -213,7 +214,7 @@
             
             <div class="loading-container" id="loadingArea">
                 <div class="spinner"></div>
-                <div style="color:#666; font-size:14px; font-style:italic;">Compression et analyse de la page en cours...</div>
+                <div style="color:#666; font-size:14px; font-style:italic;">Traitement et analyse de la page en cours...</div>
             </div>
         </div>
 
@@ -293,7 +294,7 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                const MAX_WIDTH = 1600;
+                const MAX_WIDTH = 1200; // Légèrement réduit à 1200 pour maximiser encore plus la vitesse
                 let width = originalImg.width;
                 let height = originalImg.height;
                 
@@ -306,7 +307,12 @@
                 canvas.height = height;
                 ctx.drawImage(originalImg, 0, 0, width, height);
                 
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+                
+                // --- ALERTE DE DIAGNOSTIC ---
+                // Calcule la taille approximative du fichier final pour valider que le script tourne
+                const approxSizeKo = Math.round((compressedBase64.length * 3) / 4 / 1024);
+                alert(`Diagnostic : Image réduite avec succès à ${approxSizeKo} Ko. Envoi à l'IA...`);
 
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
